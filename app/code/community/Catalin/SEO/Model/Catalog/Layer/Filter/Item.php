@@ -26,7 +26,15 @@ class Catalin_SEO_Model_Catalog_Layer_Filter_Item extends Mage_Catalog_Model_Lay
         }
         return $this->helper;
     }
-
+   /**
+    * Get RequestVar
+    *
+    * @return string
+    */
+   public function getRequestVar()
+   {
+       return $this->getFilter()->getRequestVar();
+   }
     /**
      * Get filter item url
      *
