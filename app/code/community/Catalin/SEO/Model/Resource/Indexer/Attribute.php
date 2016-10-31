@@ -172,35 +172,6 @@ class Catalin_SEO_Model_Resource_Indexer_Attribute extends Mage_Index_Model_Reso
         }
 
         return $data;
-    }                            $urlValue = $origUrlValue . '-' . ++$countValue;
-                            $found = true;
-                        }
-                    }
-                } while ($found);
-
-                // Check if this url key is taken and add -{count}
-                $countKey = 0;
-                $origUrlKey = $urlKey;
-                do {
-                    $found = false;
-                    if ($this->urlKeyExists($attribute->getId(), $urlKey)) {
-                        $urlKey = $origUrlKey . '-' . ++$countKey;
-                        $found = true;
-                    }
-                } while ($found);
-
-                $data[] = array(
-                    'attribute_code' => $attribute->getAttributeCode(),
-                    'attribute_id' => $attribute->getId(),
-                    'store_id' => $storeId,
-                    'option_id' => $option['value'],
-                    'url_key' => $urlKey,
-                    'url_value' => $urlValue,
-                );
-            }
-        }
-
-        return $data;
     }
 
     /**
