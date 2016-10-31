@@ -118,23 +118,23 @@ class Catalin_SEO_Model_Resource_Indexer_Attribute extends Mage_Index_Model_Reso
     protected function getInsertValues($attribute)
     {
         $data = array();
+        $storeIdAdmin = 0;
+        $attribute->setStoreId($storeIdAdmin);
+        if ($attribute->getSourceModel()) {
+            $options = $attribute->getSource()->getAllOptions(false);
+        } else {
+            $collection = Mage::getResourceModel('eav/entity_attribute_option_collection')
+                ->setStoreFilter($storeIdAdmin)
+                ->setPositionOrder('asc')
+                ->setAttributeFilter($attribute->getId())
+                ->load();
+            $options = $collection->toOptionArray();
+        }
         foreach ($this->getAllStoresIds() as $storeId) {
-            $attribute->setStoreId($storeId);
-            if ($attribute->getSourceModel()) {
-                $options = $attribute->getSource()->getAllOptions(false);
-            } else {
-                $collection = Mage::getResourceModel('eav/entity_attribute_option_collection')
-                    ->setStoreFilter($storeId)
-                    ->setPositionOrder('asc')
-                    ->setAttributeFilter($attribute->getId())
-                    ->load();
-                $options = $collection->toOptionArray();
-            }
-
             foreach ($options as $option) {
                 // Generate url value
                 $urlValue = $this->getHelper()->transliterate($option['label']);
-                $urlKey = $this->getHelper()->transliterate($attribute->getStoreLabel($storeId));
+                $urlKey = $this->getHelper()->transliterate($attribute->getStoreLabel($storeIdAdmin));
 
                 // Check if this url value is taken and add -{count}
                 $countValue = 0;
@@ -144,6 +144,35 @@ class Catalin_SEO_Model_Resource_Indexer_Attribute extends Mage_Index_Model_Reso
                     foreach ($data as $line) {
                         if ($line['store_id'] == $storeId && $line['url_value'] == $urlValue) {
                             $urlValue = $origUrlValue . '-' . ++$countValue;
+                            $found = true;
+                        }
+                    }
+                } while ($found);
+
+                // Check if this url key is taken and add -{count}
+                $countKey = 0;
+                $origUrlKey = $urlKey;
+                do {
+                    $found = false;
+                    if ($this->urlKeyExists($attribute->getId(), $urlKey)) {
+                        $urlKey = $origUrlKey . '-' . ++$countKey;
+                        $found = true;
+                    }
+                } while ($found);
+
+                $data[] = array(
+                    'attribute_code' => $attribute->getAttributeCode(),
+                    'attribute_id' => $attribute->getId(),
+                    'store_id' => $storeId,
+                    'option_id' => $option['value'],
+                    'url_key' => $urlKey,
+                    'url_value' => $urlValue,
+                );
+            }
+        }
+
+        return $data;
+    }                            $urlValue = $origUrlValue . '-' . ++$countValue;
                             $found = true;
                         }
                     }
